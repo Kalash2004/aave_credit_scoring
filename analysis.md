@@ -1,88 +1,112 @@
 # Credit Score Analysis for Aave V2 Wallets
 
-This file explains what was done in this project, how the credit scores were calculated, and what the results say about different wallet behaviors on the Aave V2 platform. Everything here is focused on the actual steps and results from the project, in simple words.
+This analysis explains how wallet credit scores were calculated using Aave V2 data and what the results reveal about user behavior. The system uses a rule-based scoring approach to rank each wallet based on how safely and responsibly it interacts with Aave.
 
 ---
 
 ## What Was the Goal?
 
-The goal of this project was to give each wallet that used Aave V2 a credit score. This score is a number between 0 and 1000 and shows how safely and responsibly each wallet used Aave’s features like borrowing, lending, and repaying.
+The main goal of this project was to:
+- Assign each Aave V2 wallet a score (0 to 1000) using on-chain interaction data
+- Label each wallet as "Excellent", "Good", "Fair", "Poor", or "Very Poor"
+- Understand user behavior based on their Aave usage
 
 ---
 
-## How Did the Project Work?
+## How the Project Worked
 
-1. **Collected Data:**  
-   Took raw data about what each wallet did on Aave V2 (like deposits, borrows, repayments, and liquidations).
+1. **Data Processing:**
+   - Loaded raw wallet activity on Aave V2
+   - Created a new dataset containing useful features for each wallet
 
-2. **Calculated Features:**  
-   For each wallet, worked out the following:
-   - **deposit_count:** How many times the wallet put money into Aave.
-   - **borrow_count:** How many times it took a loan.
-   - **repay_count:** How often it paid loans back.
-   - **liquidation_count:** How often the wallet lost its deposit due to not repaying.
-   - **repay_ratio:** How many loans were fully repaid, as a ratio.
-   - **unique_actions:** Number of different things the wallet did on Aave.
-   - **days_active:** How many days the wallet used Aave.
-   - **transactions_per_day:** How busy the wallet was on days it was active.
-   - **liquidation_rate:** How often the wallet was liquidated after borrowing.
+2. **Feature Extraction:**
+   For each wallet, several features were calculated:
+   - `total_transactions`: total number of Aave actions performed
+   - `deposit_count`: total deposits made
+   - `borrow_count`: total borrow transactions
+   - `repay_count`: number of repayments made
+   - `liquidation_count`: how many times the wallet was liquidated
+   - `repay_ratio`: proportion of borrows that were repaid
+   - `days_active`: number of days between first and last activity
+   - `transactions_per_day`: activity level per day
+   - `liquidation_rate`: ratio of liquidations to borrows (if any)
+   - `unique_actions`: number of different types of actions performed
 
-3. **Assigned Credit Scores:**  
-   Used a rule-based formula where good actions (like repaying) added to the score, and bad actions (like being liquidated) dropped the score. The formula mixed all the features together and gave each wallet a score from 0 (very risky) to 1000 (very safe).
+3. **Scoring & Labeling:**
+   - A **rule-based scoring system** was used to assign a credit score (0 to 1000) to each wallet.
+   - More trustworthy behavior (like repaying loans, being active longer, using more features) resulted in a higher score.
+   - More risky behavior (no repayments, frequent liquidations) led to lower scores.
 
-4. **Labeled Wallets:**  
-   Based on their score, each wallet got a label:
-   - Excellent (800–1000)
-   - Good (600–800)
-   - Fair (400–600)
-   - Poor (200–400)
-   - Very Poor (0–200)
+4. **Output:**
+   - Generated a score and label for each wallet
+   - Saved the results to a CSV file for use in visualization or evaluation
 
-5. **Saved the Results:**  
-   Made a CSV file with all the wallet scores and labels for easy checking later.
-    The complete code for all these steps is in `zeru.ipynb`.
+>  The complete code used for scoring is in the `zeru.ipynb` notebook.
+>  The score distribution chart (`score_distribution.png`) is provided in the repo.
+
 ---
 
-## What Do the Results Show?
+## Score Distribution
 
-### Score Distribution
+![Score Distribution](score_distribution.png)
 
-Most wallets had scores in the middle or low range. Fewer wallets scored at the very top.  
-*A score distribution chart was created and added to show this visually in score_distribution.png*
+Most wallets scored low, while only a small number earned very high scores.
 
-- **Wallets with High Scores (Excellent/Good):**
-  - Almost always repay their loans.
-  - Rarely get liquidated.
-  - Stay active on Aave for a long time.
-  - Use multiple features on Aave, not just one thing.
-  - Generally safe, careful, and reliable users.
-
-- **Wallets with Low Scores (Poor/Very Poor):**
-  - Get liquidated often (lose deposits because loans weren’t repaid).
-  - Rarely or never repay what they borrow.
-  - Usually only use Aave for a short time, or do just one type of action.
-  - Risky — these users cost the protocol more and are less trustworthy.
-
-- **Wallets with Fair Scores:**
-  - Do a mix of good and bad actions.
-  - May have some liquidations or missed repayments but also show some responsible behavior.
-
+| Score Range | Label        | Insight                             |
+|-------------|--------------|--------------------------------------|
+| 800–1000    | Excellent     | Long-term, safe, and reliable users |
+| 600–800     | Good          | Generally responsible               |
+| 400–600     | Fair          | Mixed behavior                      |
+| 200–400     | Poor          | Below-average behavior              |
+| 0–200       | Very Poor     | High-risk or no repayment activity  |
 
 ---
 
 ## What Did I Learn From the Data?
 
-1. The scoring rules make it easy to see which wallets are safe and which ones are risky.
-
-2. Most wallets with “Excellent” scores used Aave for a long time, tried out many features, and almost always paid back what they borrowed.
-
-3. Most wallets with “Very Poor” scores lost their deposits often and usually left soon after.
-
-4. Looking at things like how often people repay and how often they get liquidated is a good way to tell who is reliable and who is not.
+- The rule-based scoring system separates good and bad users effectively.
+- “Excellent” wallets used Aave for many days, performed different types of actions, avoided liquidation, and repaid loans.
+- “Very Poor” wallets did not repay anything, got liquidated, or only used Aave for a short time.
+- Features like `repay_ratio` and `liquidation_rate` clearly show the difference between safe and risky users.
 
 ---
 
-## Conclusion
+## Additional Insights From the Data
 
-By looking at simple on-chain actions, this project was able to sort Aave V2 wallets by risk. The process and scoring are easy to follow, and the results can help identify which users are safest and which ones should be watched closely or avoided. The project proves that clear rules and careful feature selection can give useful credit scores, even in a decentralized system with no traditional credit history.
+These insights were gained by analyzing the full dataset (3497 wallets):
+
+### 1. Most Users Interacted Very Little
+- Median wallet made only **3 total transactions**
+- 25% of users made just **1 transaction**
+>  Most users tried Aave only once or twice.
+
+### 2. Borrowing and Repayment Are Rare
+- More than half the wallets **never borrowed or repaid at all**
+>  Many users likely used Aave as a deposit platform only.
+
+### 3. Liquidation Is Uncommon
+- 75% of wallets had **zero liquidations**
+>  Most users are not taking high-risk loans.
+
+### 4. Most Wallets Were Short-Term Users
+- Median `days_active` = **3 days**, 25% used Aave for just **1 day**
+>  Quick-use or one-time interactions are common.
+
+### 5. Only a Few Users Fully Engaged
+- Median `unique_actions` = **2** out of a possible 5  
+- Max = 5  
+>  Most wallets only used a couple features; few explored the platform fully.
+
+### 6. Most Scores Are Very Low
+- **Average score** is just **~282**  
+- A few “Excellent” users earned high scores — up to **1000**
+>  High scores are rare. Most users behave too simply to earn them.
+
+---
+
+## Final Summary
+
+This project successfully built a rule-based credit scoring system using only Aave V2 transaction behavior. The results clearly highlight wallet risk levels based on real usage patterns. Most wallets scored low due to limited activity, no repayments, or inactive behavior — while top scores went to only a few well-behaved, diverse, and long-term users.
+
+➡ This approach makes scoring fully explainable and customizable — with no AI or black box, just real rules based on real behavior.
 
